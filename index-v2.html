@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ride Out Costum's - Listino & Ruota</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Luckiest+Guy&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-red: #ff0000;
+            --thick-border: 6px solid #000000;
+            --gold-glow: #ffd700;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.9)), url('BENNY.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            color: #ffffff;
+            font-family: 'Luckiest Guy', cursive;
+            margin: 0;
+            padding: 20px 10px;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: rgba(20, 20, 20, 0.95);
+            border: var(--thick-border);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 10px 10px 0px rgba(255, 0, 0, 0.3);
+            box-sizing: border-box;
+        }
+
+        header { text-align: center; margin-bottom: 30px; }
+
+        .testo-3d {
+            font-size: 40px;
+            color: var(--primary-red);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 3px 3px 0px #000, 5px 5px 0px #550000;
+            margin: 0 0 10px 0;
+        }
+
+        .categoria-titolo {
+            font-size: 20px;
+            background: var(--primary-red);
+            color: #000000;
+            display: inline-block;
+            padding: 5px 15px;
+            transform: rotate(-2deg);
+            margin-top: 30px;
+            border: 3px solid #000000;
+        }
+
+        .lista-interventi {
+            list-style: none;
+            padding: 0;
+            margin-top: 15px;
+        }
+
+        .lista-interventi li {
+            background: #1a1a1a;
+            border: 3px solid #000000;
+            margin-bottom: 10px;
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.3s;
+            font-size: 14px;
+        }
+
+        @keyframes luce-estetica {
+            0% { background: #1a1a1a; transform: scale(1); }
+            30% { background: var(--gold-glow); box-shadow: 0 0 30px var(--gold-glow); color: #000; transform: scale(1.05); }
+            100% { background: #1a1a1a; transform: scale(1); }
+        }
+
+        .highlight-active { animation: luce-estetica 2s ease-in-out; z-index: 10; }
+
+        .prezzo { color: var(--primary-red); font-size: 18px; white-space: nowrap; margin-left: 10px; }
+
+        .btn-vai-estetica {
+            background: #fff; color: #000; border: 3px solid #000; padding: 8px 15px;
+            font-size: 13px; text-decoration: none; border-radius: 8px; cursor: pointer;
+            font-family: 'Luckiest Guy'; transition: 0.3s; display: inline-block;
+            box-shadow: 3px 3px 0px var(--primary-red);
+        }
+
+        .trigger-ruota {
+            position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px;
+            background: var(--primary-red); border: 3px solid #000; border-radius: 50%;
+            font-size: 30px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 1000; box-shadow: 4px 4px 0px #000; transition: 0.3s;
+        }
+
+        .overlay-fullscreen {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.95); display: flex; flex-direction: column;
+            align-items: center; justify-content: center; opacity: 0;
+            pointer-events: none; transition: 0.5s; z-index: 2000;
+        }
+        .overlay-fullscreen.attivo { opacity: 1; pointer-events: auto; }
+        
+        .ruota-wrapper { 
+            position: relative; 
+            width: 320px; 
+            height: 320px; 
+            margin-top: 20px;
+            border: 10px solid #000;
+            border-radius: 50%;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
+        }
+
+        .perno-centrale {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: #000;
+            border: 4px solid var(--primary-red);
+            border-radius: 50%;
+            z-index: 2600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-shadow: 0 0 15px #000;
+        }
+
+        .perno-centrale span {
+            color: var(--primary-red);
+            font-family: 'Luckiest Guy';
+            font-size: 16px;
+            text-shadow: 2px 2px 0px #330000;
+        }
+
+        .freccia-indicatore {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0; 
+            height: 0; 
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 45px solid #ffffff;
+            z-index: 2500;
+            filter: drop-shadow(0px 4px 0px #000);
+        }
+
+        #canvas-ruota { width: 100%; height: 100%; border-radius: 50%; }
+
+        @media (min-width: 768px) { 
+            .ruota-wrapper { width: 500px; height: 500px; } 
+            .perno-centrale { width: 120px; height: 120px; border-width: 6px; }
+            .perno-centrale span { font-size: 24px; }
+            .testo-3d { font-size: 65px; } 
+            .categoria-titolo { font-size: 28px; } 
+            .lista-interventi li { font-size: 18px; } 
+        }
+
+        .win-popup {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center;
+            z-index: 3000; visibility: hidden; opacity: 0; transition: 0.3s;
+        }
+        .win-popup.show { visibility: visible; opacity: 1; }
+        .win-box { background: #fff; border: 6px solid #000; padding: 30px; text-align: center; color: #000; border-radius: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1 class="testo-3d">Ride Out Custom's</h1>
+        <p style="font-family: 'Bangers'; letter-spacing: 2px; font-size: 16px; color: #bbb; margin: 0; text-align: center;">Meccanica & Estetica • Il Top del Roleplay</p>
+    </header>
+
+    <div class="categoria-titolo">🛠️ [1] Ripristino e Cura del Veicolo</div>
+    <ul class="lista-interventi">
+        <li><span>Riparazioni Meccaniche 🔧</span><span class="prezzo">3.000$</span></li>
+        <li><span>Pulizia Dettagliata 🧼</span><span class="prezzo">2.000$</span></li>
+
+    <div class="categoria-titolo">🛠️ [1.1] Kit Ripristino e Cura del Veicolo</div>
+    <ul class="lista-interventi">
+        <li><span>Kit Riparazioni 🔧</span><span class="prezzo">5.000$ (a pezzo) </span></li>
+        <li><span>Kit Pulizia 🧼</span><span class="prezzo">3.000$ (a pezzo) </span></li>
+    </ul>
+
+    <div id="sezione-estetica" class="categoria-titolo">🎨 [2] Estetica</div>
+    <ul class="lista-interventi">
+        <li><span>Verniciatura Completa 🎨</span><span class="prezzo">2.500$</span></li>
+        <li id="riga-estetica-singola"><span>Componenti Estetiche &#x2699; (Neon, Cerchi, Spoiler, ecc.) </span><span class="prezzo">2.000$ (a pezzo) </span></li>
+        <li><span>Applicazione Livrea 🖌️</span><span class="prezzo">4.000$</span></li>
+    </ul>
+
+    <div class="categoria-titolo">🏎️ [3] Categoria: Kit completo</div>
+    <ul class="lista-interventi">
+        <li><span>Full Kit Meccanica 👑 <small>(Incl. Riparazione/Pulizia)</small></span><span class="prezzo">25.000$</span></li>
+        <li>
+            <span>Full Kit Estetica ✨ (In base alle componenti estetiche) </span>
+            <button class="btn-vai-estetica" onclick="evidenziaEstetica()">VEDI COMPONENTI</button>
+        </li>
+    </ul>
+
+        <div class="categoria-titolo">🚛 [4] Assistenza Stradale</div>
+    <ul class="lista-interventi">
+        <li><span>Entro 2KM 🚛</span><span class="prezzo">5.000$</span></li>
+        <li><span>Entro 4Km 🚛</span><span class="prezzo">7.000$</span></li>
+        <li><span>Entro 6Km 🚛</span><span class="prezzo">9.000$</span></li>
+        <li><span>Entro 8Km 🚛</span><span class="prezzo">12.000$</span></li>
+        <li><span>Fuori Città 🚛</span><span class="prezzo">17.000$</span></li>
+
+    <div class="categoria-titolo">🚀 [5] Motore & Turbo</div>
+    <ul class="lista-interventi">
+        <li><span>Modifica Turbo 🌪️</span><span class="prezzo">2.000$</span></li>
+<li>
+========================================== Ride Out Custom's ==========================================
+        <li><span>Upgrade Motore LIVELLO 1</span><span class="prezzo">2.000$</span></li>
+        <li><span>Upgrade Motore LIVELLO 2</span><span class="prezzo">2.500$</span></li>
+        <li><span>Upgrade Motore LIVELLO 3</span><span class="prezzo">4.500$</span></li>
+        <li><span>Upgrade Motore LIVELLO 4</span><span class="prezzo">6.500$</span></li>
+    </ul>
+
+    <div class="categoria-titolo">🛑 [6] Freni</div>
+    <ul class="lista-interventi">
+        <li><span>Upgrade Freni LIVELLO 1</span><span class="prezzo">2.000$</span></li>
+        <li><span>Upgrade Freni LIVELLO 2</span><span class="prezzo">2.500$</span></li>
+        <li><span>Upgrade Freni LIVELLO 3</span><span class="prezzo">3.000$</span></li>
+        <li><span>Upgrade Freni LIVELLO 4</span><span class="prezzo">3.500$</span></li>
+    </ul>
+
+    <div class="categoria-titolo">⚙️ [7] Trasmissioni</div>
+    <ul class="lista-interventi">
+        <li><span>Upgrade Trasmissione LIVELLO 1</span><span class="prezzo">2.000$</span></li>
+        <li><span>Upgrade Trasmissione LIVELLO 2</span><span class="prezzo">2.500$</span></li>
+        <li><span>Upgrade Trasmissione LIVELLO 3</span><span class="prezzo">3.000$</span></li>
+        <li><span>Upgrade Trasmissione LIVELLO 4</span><span class="prezzo">3.500$</span></li>
+    </ul>
+
+    <div class="categoria-titolo">🛑 [8] Sospensioni</div>
+    <ul class="lista-interventi">
+        <li><span>Upgrade Sospensioni LIVELLO 1</span><span class="prezzo">2.000$</span></li>
+        <li><span>Upgrade Sospensioni LIVELLO 2</span><span class="prezzo">2.500$</span></li>
+        <li><span>Upgrade Sospensioni LIVELLO 3</span><span class="prezzo">3.000$</span></li>
+        <li><span>Upgrade Sospensioni LIVELLO 4</span><span class="prezzo">3.500$</span></li>
+    </ul>
+
+    <div class="categoria-titolo">🛡️ [9] Corazze (Blindatura)</div>
+    <ul class="lista-interventi">
+        <li><span>Upgrade Corazza LIVELLO 1</span><span class="prezzo">4.000$</span></li>
+        <li><span>Upgrade Corazza LIVELLO 2</span><span class="prezzo">5.000$</span></li>
+        <li><span>Upgrade Corazza LIVELLO 3</span><span class="prezzo">6.000$</span></li>
+        <li><span>Upgrade Corazza LIVELLO 4</span><span class="prezzo">7.000$</span></li>
+        <li><span>Upgrade Corazza LIVELLO 5</span><span class="prezzo">8.000$</span></li>
+    </ul>
+
+    <footer>
+        <p style="text-align:center; margin-top:40px; color:#ff0000; font-family:'Bangers'; font-size:18px;">⭐
+— DEV BY 𝕽𝖔𝖒𝖆 —
+⭐</p>
+    </footer>
+</div>
+
+<div class="trigger-ruota" onclick="apriRuota()">🎰</div>
+
+<div class="overlay-fullscreen" id="overlay-ruota">
+    <span onclick="chiudiRuota()" style="position:absolute; top:20px; right:30px; font-size:50px; cursor:pointer; color:white;">✖</span>
+    <h2 style="color: white; margin-bottom: 10px;">TENTA LA FORTUNA</h2>
+    <input type="text" id="discord-id" placeholder="ID DISCORD" style="padding:12px; font-family:'Luckiest Guy'; text-align:center; border: 4px solid #000; width: 250px; margin-bottom:10px;">
+    <input type="text" id="nome-cognome" placeholder="NOME E COGNOME (IC)" style="padding:12px; font-family:'Luckiest Guy'; text-align:center; border: 4px solid #000; width: 250px; margin-bottom:10px;">
+    <div class="ruota-wrapper">
+        <div class="freccia-indicatore"></div>
+        <div class="perno-centrale">
+            <span>Ride Out Custom's</span>
+        </div>
+        <canvas id="canvas-ruota" width="600" height="600"></canvas>
+    </div>
+
+    <button id="btn-spin" onclick="spin()" style="margin-top:30px; padding:15px 40px; font-family:'Luckiest Guy'; font-size:24px; cursor:pointer; background:#fff; border:4px solid #000; box-shadow: 5px 5px 0 var(--primary-red);">GIRA ORA!</button>
+</div>
+
+<div class="win-popup" id="win-popup">
+    <div class="win-box">
+        <h1 id="win-title">COMPLIMENTI!</h1>
+        <div id="win-text" style="font-size: 35px; color: var(--primary-red); margin: 20px 0; border: 4px dashed #000; padding: 10px;">---</div>
+        <p id="win-id-display" style="font-size: 14px; color: #666;"></p>
+        <button onclick="document.getElementById('win-popup').classList.remove('show')" style="padding:10px 20px; font-family:'Luckiest Guy'; cursor:pointer; background: #000; color: #fff; border:none; border-radius:10px;">RISCATTA PREMIO</button>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('canvas-ruota');
+    const ctx = canvas.getContext('2d');
+    let spinning = false;
+
+    const premi = [
+        { nome: "FULL KIT", color: "#FFD700" }, 
+        { nome: "RIPARAZIONE", color: "#FF4500" },
+        { nome: "1x ESTETICA", color: "#9400D3" }, 
+        { nome: "NULLA", color: "#222222" },
+        { nome: "PULIZIA", color: "#00BFFF" }, 
+        { nome: "SCONTO 5%", color: "#32CD32" },
+        { nome: "RITENTA", color: "#FF69B4" }
+    ];
+
+    function disegnaRuota() {
+        const numPremi = premi.length;
+        const angolo = (Math.PI * 2) / numPremi;
+        ctx.clearRect(0,0,600,600);
+        
+        premi.forEach((p, i) => {
+            const startAngle = i * angolo;
+            const endAngle = (i + 1) * angolo;
+            ctx.beginPath();
+            ctx.fillStyle = p.color;
+            ctx.moveTo(300, 300);
+            ctx.arc(300, 300, 300, startAngle, endAngle);
+            ctx.fill();
+            ctx.strokeStyle = "#000";
+            ctx.lineWidth = 6;
+            ctx.stroke();
+
+            ctx.save();
+            ctx.translate(300, 300);
+            ctx.rotate(startAngle + angolo / 2);
+            ctx.fillStyle = "#fff";
+            ctx.font = "bold 24px Luckiest Guy";
+            ctx.textAlign = "right";
+            ctx.fillText(p.nome, 275, 10);
+            ctx.restore();
+        });
+    }
+
+    function apriRuota() { document.getElementById('overlay-ruota').classList.add('attivo'); disegnaRuota(); }
+    function chiudiRuota() { if(!spinning) document.getElementById('overlay-ruota').classList.remove('attivo'); }
+
+    function spin() {
+        if(spinning) return;
+        const idUser = document.getElementById('discord-id').value;
+        const nomeCognome = document.getElementById('nome-cognome').value;
+        if(!idUser) return alert("Inserisci il tuo ID Discord!");
+        if(!nomeCognome) return alert("Inserisci Nome e Cognome!");
+        
+        spinning = true;
+        const giriExtra = Math.floor(Math.random() * 5) + 5;
+        const gradiCasuali = Math.floor(Math.random() * 360);
+        const totaleGradi = (giriExtra * 360) + gradiCasuali;
+        
+        canvas.style.transition = "transform 5s cubic-bezier(0.15, 0, 0.15, 1)";
+        canvas.style.transform = `rotate(${totaleGradi}deg)`;
+        
+        setTimeout(() => {
+            spinning = false;
+            const gradiFinali = totaleGradi % 360;
+            const gradiEffettivi = (360 - (gradiFinali % 360) + 270) % 360; 
+            const indicePremio = Math.floor(gradiEffettivi / (360 / premi.length));
+            const vinto = premi[indicePremio].nome;
+
+            document.getElementById('win-text').innerText = vinto;
+            document.getElementById('win-id-display').innerText = "Utente: " + idUser + " — " + nomeCognome;
+            document.getElementById('win-popup').classList.add('show');
+            
+            canvas.style.transition = "none";
+            canvas.style.transform = `rotate(${gradiFinali}deg)`;
+        }, 5000);
+    }
+
+    function evidenziaEstetica() {
+        const target = document.getElementById('riga-estetica-singola');
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => {
+            target.classList.add('highlight-active');
+            setTimeout(() => { target.classList.remove('highlight-active'); }, 2000);
+        }, 300);
+    }
+</script>
+
+</body>
+</html>
